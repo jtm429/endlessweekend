@@ -43,7 +43,13 @@ class Dialog(MicroEvent):
 class Question(MicroEvent):
     def parse(self):
         """Question Syntax
-        que:who:conditional:emotion:text"""
+        que:who:conditional:emotion:text
+        choice1
+        ...
+        end
+        choice2
+        ...
+        end"""
         par = self.line.split(":")
         self.type = par[0]
         self.who = par[1]
@@ -60,12 +66,37 @@ class Question(MicroEvent):
             count+=1
             dprint(count + " answer choice successfully loaded")
             cho = choose_type(self.scan)
+    
+    def nextMicro(self):
+        dprint("not yet implemented")
+
+class Choice(MicroEvent):
+    def parse(self)
+    """Choice Syntax
+    cho:who:conditional:text
+    ...
+    end"""
+    par = self.line.split(":")
+    self.type = par[0]
+    self.who = par[1]
+    self.con = par[2]
+    self.text = par[3]
+    dprint("Parsed choice MicroEvent")
+    self.nex = choose_type(self.scan)
+    dprint("choice recursion ended successfully")
+
+    def nextMicro(self):
+        dprint("not yet implemented")
+
+
 
 def choose_type(scan) -> MicroEvent :
     line = scan.readLine()
+    dprint("Read in line: \"" + line + "\"")
     typ = line.split(":")[0]
     if (typ == "dia") return Dialog(line, scan)
     if (typ == "que") return Question(line, scan)
+    if (typ == "cho") return Choice(line, scan)
 
 class EventFileParser:
     def __init__(self, filename):
