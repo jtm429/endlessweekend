@@ -10,7 +10,6 @@ class EventRoot:
         self.id
         self.location
         self.MEroot  #microevent root
-    def parseMicro(self, scan):
         
 #basic MicroEvent Class
 class MicroEvent():
@@ -45,11 +44,28 @@ class Question(MicroEvent):
     def parse(self):
         """Question Syntax
         que:who:conditional:emotion:text"""
+        par = self.line.split(":")
+        self.type = par[0]
+        self.who = par[1]
+        self.con = par[2]
+        self.emo = par[3]
+        self.text = par[4]
+        dprint("Parsed Question MicroEvent")
+        count = 0
+        cho = choose_type(self.scan)
+        self.choices = []
+        #answer choice loop
+        while cho.type != "end":
+            self.choices.append(cho)
+            count+=1
+            dprint(count + " answer choice successfully loaded")
+            cho = choose_type(self.scan)
 
 def choose_type(scan) -> MicroEvent :
     line = scan.readLine()
     typ = line.split(":")[0]
     if (typ == "dia") return Dialog(line, scan)
+    if (typ == "que") return Question(line, scan)
 
 class EventFileParser:
     def __init__(self, filename):
