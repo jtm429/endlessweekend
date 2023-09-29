@@ -1,0 +1,27 @@
+test:testlocation
+dia::::This is test dialogue for the narrator
+dia::::This is to see if it recurse successfully
+que::::Does Question work correctly too?
+cho:::only if choice does.
+dia::::We'll see in a second
+end
+cho:::it does
+dia::::and choice does too if it reached this point
+cqu::Now we'll test CardQuestion
+car:chill:1:3:It should work.
+dia::::not borked yet
+inc:1:chill:3
+dis:arcane
+end
+fail:not gonna work
+dia::::ironically not borked either
+dis:arcane
+end
+car:arcane:1::If this goes right as well...
+dia::::then I am a wizard
+inc:1:arcane:5
+dis:chill
+dia::::You have no chill
+end
+end
+end
