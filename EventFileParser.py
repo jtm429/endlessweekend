@@ -234,6 +234,7 @@ class EventFileParser:
         erinfo = line.split(":")
         evroo = EventRoot(scan, erinfo[0],erinfo[1])
         dprint("EventRoot parsed successfully!")
+        scan.close()
         
         
 

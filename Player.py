@@ -11,6 +11,10 @@ class player():
         self.days = int(data[0])
         self.attr = attributes(data[1])
         self.flags = data[2].split(":")
+    #plays an event
+    def play_event(self, file):
+
+
 
 
         
@@ -47,12 +51,17 @@ class skill():
     #takes the attributes of the player and calculates their value. 
     def getVal(self, attr):
     sum = attr[self.dad]+attr[self.mom]+self.bval
+    return sum
+    #adds experience to raise base value and level up the skill
     def addXP(self, attr,baseXP):
         addy = baseXP*(attr[self.dad]+attr[self.mom])
         self.exp= self.exp + addy
         if self.exp > 100*self.bval :
             self.exp-=(100*self.bval)
             self.bval+=1
+    #declaring str method
+    def __str__(self) -> str:
+        return str(self.bval) +"."+str(self.exp)
 
 
 
