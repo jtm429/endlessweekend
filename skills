@@ -1,0 +1,15 @@
+analysis:mind::desc
+influence:outw::desc
+introspection:inwa::desc
+finesse:body::desc
+creation:soul::desc
+eloquence:soul:outw:desc
+rhythm:soul:body:desc
+expression:soul:inwa:desc
+occultism:soul:mind:desc
+sociology:outw:mind:desc
+physiology:body:mind:desc
+mnemonics:inwa:mind:desc
+empathy:outw:inwa:desc
+intimidation:outw:body:desc
+agility:body:inwa:desc
