@@ -26,7 +26,9 @@ class player():
         self.micro_router(root.MEroot)
     #routes microevents to the correct methods to play them
     def micro_router(self, mevent):
-        if mevent.type = "dia" : play_dia(mevent)
+        if mevent.type == "dia" : self.play_dia(mevent)
+        if mevent.type == "que" : self.play_que(mevent)
+        if mevent.type == "dia" : self.play_dia(mevent)
     #a conditional statement evaluator
     def condition_eval(self, who, cond):
         #the most common conditional exits out almost immediately
@@ -56,8 +58,42 @@ class player():
     def play_dia(self,mevent):
         if(self.condition_eval(mevent.who, mevent.con)):
             if(mevent.who != "") : print(mevent.who+":")
-            if(mevent.emo != "") : print("<"+mevent.emo+">")
+            if (mevent.who in self.attr.skills): 
+                print("["+mevent.who+"]: ")
+            else :
+                print(mevent.who + ": ")
             print(mevent.text)
+    def format_choice(self,mevent) -> str:
+        #a choice should only have a who for a skill, you can't choose what someone else says.
+        a = ""
+        if(mevent.who != "" & mevent.who in self.attr.skills): 
+            a +="["+mevent.who+"]: "
+        a+=self.text
+        return a
+
+
+
+    def play_que(self,mevent):
+        if(self.condition_eval(mevent.who, mevent.con)):
+            if(mevent.who != "" ):  
+                if (mevent.who in self.attr.skills): 
+                    print("["+mevent.who+"]: ")
+                else :
+                    print(mevent.who + ": ")
+            if(mevent.emo != "") : print("<"+mevent.emo+"> ")
+            print(mevent.text+"\n")
+            #now for the choices
+            
+            for cho in range(len(mevent.choices)) :
+                a = str(cho)+": "+self.format_choice(mevent.choice[cho])
+                print(a)
+            ans = -1
+            while  ans not in range(len(mevent.choices)):
+                ans = int(input("select an answer: "))
+            self.micro_router(mevent.choices[ans])
+
+
+
         
         
 
