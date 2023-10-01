@@ -198,6 +198,14 @@ class increase(MicroEvent):
     def nextMicro(self):
         dprint("not yet implemented")
 
+class toggle_flag(MicroEvent):
+    def parse(self):
+        #syntax
+        #fla:flag:on or off
+        par=self.line.split(":")
+        self.type = par[0]
+        self.flag = par[1]
+        self.on = par[2] #True is on, soooo...
 #Discard a skill card
 class discard(MicroEvent):
     def parse(self):
@@ -237,6 +245,7 @@ def choose_type(scan, root) -> MicroEvent :
     if (typ == "inc") : return increase(line, scan, root)
     if (typ == "dis") : return discard(line, scan, root)
     if (typ == "lin") : return link(line, scan, root)
+    if (typ == "fla") : return toggle_flag(line, scan, root)
 
 class EventFileParser:
     def __init__(self, filename):
