@@ -2,7 +2,7 @@
 def dprint(text):
     debugging = True
     if debugging : 
-        print(text)
+        print("debug:"+text)
 
 
 
@@ -31,8 +31,6 @@ class MicroEvent():
         self.parse()
     def parse(self):
         pass
-    def nextMicro(self):
-        pass
 
 #extended from MicroEvent
 class Dialog(MicroEvent):
@@ -48,8 +46,6 @@ class Dialog(MicroEvent):
         dprint("Parsed Dialog MicroEvent")
         self.nex = choose_type(self.scan,self.root)
         dprint("Dialog recursion ended successfully!")
-    def nextMicro(self):
-        return self.nex
 
 #extended from MicroEvent
 class Question(MicroEvent):
@@ -58,10 +54,13 @@ class Question(MicroEvent):
         que:who:conditional:emotion:text
         choice1
         ...
-        end
+        end:cho
         choice2
         ...
-        end"""
+        end:cho
+        end:que
+        
+        """
         par = self.line.split(":")
         self.type = par[0]
         self.who = par[1]
@@ -78,10 +77,12 @@ class Question(MicroEvent):
             count+=1
             dprint(str(count) + " answer choice successfully loaded!")
             cho = choose_type(self.scan,self.root)
+        #for question to be conditional you need to have a fail state
+        if(self.con != ""):
+            dprint("Conditional question fail state")
+            self.nex = choose_type(self.scan, self.root)
         dprint("Question While Loop Complete!")
     
-    def nextMicro(self):
-        dprint("not yet implemented")
 
 #extended from MicroEvent
 class Choice(MicroEvent):
@@ -99,8 +100,6 @@ class Choice(MicroEvent):
         self.nex = choose_type(self.scan,self.root)
         dprint("choice recursion ended successfully!")
 
-    def nextMicro(self):
-        return self.nex
 
 """
 This is intended to be a question where you aren't given options outright.
@@ -124,10 +123,11 @@ class CardQuestion(MicroEvent):
         dprint("Parsed Card Question MicroEvent")
         count = 0
         cho = choose_type(self.scan,self.root)
-        self.choices = []
+        self.choices = {}
         #answer choice loop
         while cho.type != "end":
-            self.choices.append(cho)
+            dprint(cho.card+ " " +str(cho))
+            self.choices.update({cho.card :cho})
             count+=1
             dprint(str(count) + " answer card successfully loaded")
             cho = choose_type(self.scan,self.root)
@@ -140,11 +140,11 @@ class Card(MicroEvent):
         #Card Syntax
         #car:card:isProvided:conditional:text
         #...
-        #end
+        #end:pass
         #fail
         #...
-        #end
-        #end
+        #end:fail
+        #end:card
         par = self.line.split(":")
         self.type = par[0]
         self.card = par[1]
@@ -157,34 +157,32 @@ class Card(MicroEvent):
         if self.con != "" : 
             self.fail = choose_type(self.scan,self.root)
         dprint("Card Choice recursion exited successfully!")
-    def nextMicro(self):
-        dprint("not yet implemented")
 
 #fail condition for card choice
-class fail(MicroEvent):
+class Fail(MicroEvent):
     def parse(self):
         #syntax fail:text
         #...
-        #end
+        #end:fail
         par = self.line.split(":")
         self.type = par[0]
         self.text = par[1]
         dprint("Fail con loaded, forehead")
         self.nex = choose_type(self.scan,self.root)
-    def nextMicro(self):
-        dprint("not yet implemented")
 
 
 
 
 class End(MicroEvent):
     def parse(self):
-        self.type = self.line
-    def nextMicro(self):
-        dprint("If you're reaching this point, it's trying to go past END somehow.")
+        if ":" in self.line:
+            par = self.line.split(":")
+            self.type = par[0]
+            self.end = par[1]
+        else : self.type = self.line
 
 #Increase a stat or skill level
-class increase(MicroEvent):
+class Increase(MicroEvent):
     def parse(self):
         #syntax
         #inc:isSkill:toIncrease:amount
@@ -192,35 +190,31 @@ class increase(MicroEvent):
         self.type = par[0]
         self.isSkill = par[1]
         self.toIncrease = par[2]
-        self.amt = par[3]
+        self.amt = int(par[3])
         dprint("Parsed Skill/Stat Increase")
         self.nex = choose_type(self.scan,self.root)
-    def nextMicro(self):
-        dprint("not yet implemented")
 
-class toggle_flag(MicroEvent):
+class Toggle_Flag(MicroEvent):
     def parse(self):
         #syntax
         #fla:flag:on or off
         par=self.line.split(":")
         self.type = par[0]
         self.flag = par[1]
-        self.on = par[2] #True is on, soooo...
+        self.on = ("1" == par[2]) #True is on, soooo...
 #Discard a skill card
-class discard(MicroEvent):
+class Discard(MicroEvent):
     def parse(self):
         #syntax
-        #dis:skill
+        #dis:card
         par = self.line.split(":")
         self.type = par[0]
-        self.skill = par[1]
+        self.card = par[1]
         dprint("Parsed discard")
         self.nex = choose_type(self.scan,self.root)
-    def nextMicro(self):
-        dprint("not yet implemented")
 
 #MicroEvent that sends you back to a link tag
-class link(MicroEvent):
+class Link(MicroEvent):
     def parse(self):
         par = self.line.split(":")
         self.type = par[0]
@@ -241,15 +235,16 @@ def choose_type(scan, root) -> MicroEvent :
     if (typ == "cho") : return Choice(line, scan, root)
     if (typ == "cqu") : return CardQuestion(line, scan, root)
     if (typ == "car") : return Card(line, scan, root)
-    if (typ == "fail") : return fail(line, scan, root)
-    if (typ == "inc") : return increase(line, scan, root)
-    if (typ == "dis") : return discard(line, scan, root)
-    if (typ == "lin") : return link(line, scan, root)
-    if (typ == "fla") : return toggle_flag(line, scan, root)
+    if (typ == "fail") : return Fail(line, scan, root)
+    if (typ == "inc") : return Increase(line, scan, root)
+    if (typ == "dis") : return Discard(line, scan, root)
+    if (typ == "lin") : return Link(line, scan, root)
+    if (typ == "fla") : return Toggle_Flag(line, scan, root)
 
 class EventFileParser:
     def __init__(self, filename):
         self.file = filename
+        
     #begin recursive parsing process. 
     def parse(self):
         dprint("Opening " + self.file + "...")
@@ -262,8 +257,9 @@ class EventFileParser:
         
         dprint("EventRoot Object Created")
         erinfo = line.split(":")
-        evroo = EventRoot(scan, erinfo[0],erinfo[1])
+        self.root = EventRoot(scan, erinfo[0],erinfo[1])
         dprint("EventRoot parsed successfully!")
+        scan.close()
         
         
 

@@ -11,15 +11,15 @@ cqu::Now we'll test CardQuestion
 car:chill:1:3:It should work.
 dia::::not borked yet
 inc:1:chill:3
-dis:arcane
+dis:occultism
 end
 fail:not gonna work
 dia::::ironically not borked either
-dis:arcane
+dis:occultism
 end
-car:arcane:1::If this goes right as well...
+car:occultism:1::If this goes right as well...
 dia::::then I am a wizard
-inc:1:arcane:5
+inc:1:occultism:5
 dis:chill
 dia::::I teleport you back to the beginning
 lin:begin
