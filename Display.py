@@ -65,9 +65,9 @@ class TextDisplay(Displayer):
         if(self.plyr.condition_eval(event.who, event.con)):
             if(event.who != "") : print(event.who+":")
             if (event.who in self.plyr.attr.skills): 
-                print("["+event.who+"]: ")
+                print("["+event.who+"]: ",end="")
             else :
-                print(event.who + ": ")
+                print(event.who + ": ",end="")
             print(event.text)
             self.wait()
 
@@ -86,11 +86,11 @@ class TextDisplay(Displayer):
         if(self.plyr.condition_eval(event.who, event.con)):
             if(event.who != "" ):  
                 if (event.who in self.plyr.attr.skills): 
-                    print("["+event.who+"]: ")
+                    print("["+event.who+"]: ",end="")
                 else :
-                    print(event.who + ": ")
-            if(event.emo != "") : print("<"+event.emo+"> ")
-            print(event.text+"\n")
+                    print(event.who + ": ",end="")
+            if(event.emo != "") : print("<"+event.emo+"> ",end="")
+            print(event.text)
             #now for the choices
             
             for cho in range(len(event.choices)) :
@@ -98,7 +98,11 @@ class TextDisplay(Displayer):
                 print(a)
             ans = -1
             while  ans not in range(len(event.choices)):
-                ans = int(input("select an answer: "))
+                ansss = input("select an answer: ")
+                try:
+                    ans = int(ansss)
+                except ValueError:
+                    print("Invalid input: please input a number within range")
                 eve.dprint(str(ans))
 
             return event.choices[ans]

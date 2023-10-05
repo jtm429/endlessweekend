@@ -1,0 +1,88 @@
+intro1:playground
+dia::::It's your first day at a new elementary school. You haven't really made any friends here yet
+dia::::There's one group of kids playing kickball on one side of the playground, and a girl watching the ants on the other.
+que::::where do you go?
+cho:::Play kickball with the group
+dia::::More likely to find friends with more kids around.
+dia::::You approach and the team leaders begin arguing. They turn to you.
+dia:Morgan::smug:Surely you don't want to join a losing team.
+dia:Leo::annoyed:She's already winning. It's not fair to give them an extra player. 
+dia:Morgan::smug:It's not like it even matters in Kickball.
+que:Leo:::You decide then, whose team do you want to join?
+cho:It's not fair to me to be losing before I ever get to play
+dia:Morgan::happy:I knew you'd make the right choice. 
+inc:0:body:2
+inc:0:outw:1
+fla:morgan_childhood_friend:1
+end:cho
+cho:::It's only fair I should choose Leo's side
+dia:Morgan::annoyed:Your loss, losers
+dia:Leo::smug:Don't worry. We'll turn it around from here. 
+inc:0:body:1
+inc:0:outw:2
+fla:leo_childhood_friend:1
+dia:Leo:::We're only down by one, so we need two points
+cqu:Leo:::Alright, here's what we're going to do...
+car:analysis:1::Fake them out?
+dia:Leo::happy:Exactly, kick it really close to load a base,
+dia:Leo::happy:then when the next person goes up, kick it as hard as possible. 
+que:Leo:::so do you want to be on base or the kicker?
+cho:::I'll be on base, and you'll kick
+dia::::Leo nods. The first part of the plan goes off without a hitch. 
+dia::::You lightly tap the ball, and run to the first base as they scramble for it. 
+dia::::Leo kicks it, but not far enough. 
+dia::::As you make it through, you turn to see Leo getting pegged in the back.
+inc:0:mind:2 
+dia:Morgan::happy:I'm impressed, you managed to tie it up. 
+fla:morgan_childhood_friend:1
+end:cho
+cho:::You get on base, and I'll kick
+dia::::Leo nods. The first part of the plan goes off without a hitch. 
+dia::::He lightly tap the ball, and runs to the first base as they scramble for it. 
+dia::::Your turn: you approach the plate, and the ball rolls towards you. 
+dia::::It's lighter than you expected. The ball soars over the fence. 
+dia:Oscar::happy:Whoa, nice shot!
+dia::::The new boy Oscar wasn't on either of the teams, instead he seemed to materialize within the chaos.
+dia:Morgan::angry:Nice shot? Come on, that doesn't count!
+dia:Morgan::angry:We can't even retake the lead because there's no ball!
+dia:Oscar::smug:Come on, you're just jealous you couldn't make a shot like that. 
+dia::::The ball wasn't really GONE, but it would have to be brought in by a teacher. 
+dia::::Morgan storms off.
+dia:Leo::smug:Don't worry about her, she's just a sore loser.
+inc:0:mind:1
+inc:0:body:1
+dia:Oscar:::Yeah, she'll get over it.
+fla:oscar_childhood_friend
+end:cho
+end:que
+end:pass
+car:eloquence:1::Rally the troops?
+dia:Leo::happy:Not exactly how I would put it, but yeah
+dia:Leo:::Look, we can win this if we just work together. We just need to squeak two more runs out to put us ahead. 
+
+end:pass
+end:que
+end:cho
+end:que
+end:cho
+cho:::it does
+dia::::and choice does too if it reached this point
+cqu::Now we'll test CardQuestion
+car:chill:1:3:It should work.
+dia::::not borked yet
+inc:1:chill:3
+dis:occultism
+end
+fail:not gonna work
+dia::::ironically not borked either
+dis:occultism
+end
+car:occultism:1::If this goes right as well...
+dia::::then I am a wizard
+inc:1:occultism:5
+dis:chill
+dia::::I teleport you back to the beginning
+lin:begin
+end
+end
+end

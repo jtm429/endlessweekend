@@ -1,7 +1,7 @@
 #debug print method
-def dprint(text):
-    debugging = True
-    if debugging : 
+def dprint(text, debug=False):
+    
+    if debug : 
         print("debug:"+text)
 
 
