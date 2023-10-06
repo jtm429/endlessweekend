@@ -1,5 +1,5 @@
 test:testlocation
-dia::::This is test dialogue for the narrator
+begin#\#dia::::This is test dialogue for the narrator
 dia::::This is to see if it recurse successfully
 que::::Does Question work correctly too?
 cho:::only if choice does.
@@ -21,7 +21,8 @@ car:arcane:1::If this goes right as well...
 dia::::then I am a wizard
 inc:1:arcane:5
 dis:chill
-dia::::You have no chill
+dia::::I teleport you back to the beginning
+lin:begin
 end
 end
 end

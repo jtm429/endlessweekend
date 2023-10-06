@@ -5,20 +5,29 @@ def dprint(text):
         print(text)
 
 
+
+
 #Root node for the tree of microevents
 class EventRoot():
     def __init__(self,scan,  identification="", loc=""):
         self.id = identification
         self.location = loc
+        self.links = {}
         dprint("Begin parsing tree")
-        self.MEroot  = choose_type(scan) #microevent root
+        self.MEroot  = choose_type(scan, self) #microevent root
         
 #basic MicroEvent Class
 class MicroEvent():
     
-    def __init__(self,lima, scan):
-        self.line = lima
+    def __init__(self,lima, scan, root):
+        if "#\\#" in lima:
+            linkk = lima.split("#\\#")
+            root.links.update({linkk[0]:self})
+            self.line = linkk[1]
+        else :
+            self.line = lima
         self.scan = scan
+        self.root = root
         self.parse()
     def parse(self):
         pass
@@ -37,7 +46,7 @@ class Dialog(MicroEvent):
         self.emo = par[3]   #determines which of the sprites will be displayed in the future
         self.text = par[4]
         dprint("Parsed Dialog MicroEvent")
-        self.nex = choose_type(self.scan)
+        self.nex = choose_type(self.scan,self.root)
         dprint("Dialog recursion ended successfully!")
     def nextMicro(self):
         return self.nex
@@ -61,14 +70,14 @@ class Question(MicroEvent):
         self.text = par[4]
         dprint("Parsed Question MicroEvent")
         count = 0
-        cho = choose_type(self.scan)
+        cho = choose_type(self.scan,self.root)
         self.choices = []
         #answer choice loop
         while cho.type != "end":
             self.choices.append(cho)
             count+=1
             dprint(str(count) + " answer choice successfully loaded!")
-            cho = choose_type(self.scan)
+            cho = choose_type(self.scan,self.root)
         dprint("Question While Loop Complete!")
     
     def nextMicro(self):
@@ -87,7 +96,7 @@ class Choice(MicroEvent):
         self.con = par[2]
         self.text = par[3]
         dprint("Parsed choice MicroEvent")
-        self.nex = choose_type(self.scan)
+        self.nex = choose_type(self.scan,self.root)
         dprint("choice recursion ended successfully!")
 
     def nextMicro(self):
@@ -114,14 +123,14 @@ class CardQuestion(MicroEvent):
         self.text = par[2]
         dprint("Parsed Card Question MicroEvent")
         count = 0
-        cho = choose_type(self.scan)
+        cho = choose_type(self.scan,self.root)
         self.choices = []
         #answer choice loop
         while cho.type != "end":
             self.choices.append(cho)
             count+=1
             dprint(str(count) + " answer card successfully loaded")
-            cho = choose_type(self.scan)
+            cho = choose_type(self.scan,self.root)
         dprint("Card Question Loop ended successfully")
 
 #this is the card answer choice for Card Questions
@@ -143,10 +152,10 @@ class Card(MicroEvent):
         self.con = par[3]
         self.text = par[4]
         dprint("Parsed Card Choice MicroEvent")
-        self.passed = choose_type(self.scan)
+        self.passed = choose_type(self.scan,self.root)
         dprint("Card Choice Pass Condition Loaded")
         if self.con != "" : 
-            self.fail = choose_type(self.scan)
+            self.fail = choose_type(self.scan,self.root)
         dprint("Card Choice recursion exited successfully!")
     def nextMicro(self):
         dprint("not yet implemented")
@@ -161,7 +170,7 @@ class fail(MicroEvent):
         self.type = par[0]
         self.text = par[1]
         dprint("Fail con loaded, forehead")
-        self.nex = choose_type(self.scan)
+        self.nex = choose_type(self.scan,self.root)
     def nextMicro(self):
         dprint("not yet implemented")
 
@@ -185,10 +194,18 @@ class increase(MicroEvent):
         self.toIncrease = par[2]
         self.amt = par[3]
         dprint("Parsed Skill/Stat Increase")
-        self.nex = choose_type(self.scan)
+        self.nex = choose_type(self.scan,self.root)
     def nextMicro(self):
         dprint("not yet implemented")
 
+class toggle_flag(MicroEvent):
+    def parse(self):
+        #syntax
+        #fla:flag:on or off
+        par=self.line.split(":")
+        self.type = par[0]
+        self.flag = par[1]
+        self.on = par[2] #True is on, soooo...
 #Discard a skill card
 class discard(MicroEvent):
     def parse(self):
@@ -198,24 +215,37 @@ class discard(MicroEvent):
         self.type = par[0]
         self.skill = par[1]
         dprint("Parsed discard")
-        self.nex = choose_type(self.scan)
+        self.nex = choose_type(self.scan,self.root)
     def nextMicro(self):
         dprint("not yet implemented")
-    
 
-def choose_type(scan) -> MicroEvent :
+#MicroEvent that sends you back to a link tag
+class link(MicroEvent):
+    def parse(self):
+        par = self.line.split(":")
+        self.type = par[0]
+        self.nex = self.root.links[par[1]]
+        dprint("link to \"" + par[1] + "\" successfully parsed!")  
+
+def choose_type(scan, root) -> MicroEvent :
     line = scan.readline().split("\n")[0]
-    if (line == "end") : return End(line,scan)
+    linkless = line
+    if "#\\#" in line:
+        linkless = line.split("#\\#")[1]
+    #there's no reason someone would link to end. 
+    if (line == "end") : return End(line,scan, root)
     dprint("Read in line: \"" + line + "\"")
-    typ = line.split(":")[0]
-    if (typ == "dia") : return Dialog(line, scan)
-    if (typ == "que") : return Question(line, scan)
-    if (typ == "cho") : return Choice(line, scan)
-    if (typ == "cqu") : return CardQuestion(line, scan)
-    if (typ == "car") : return Card(line, scan)
-    if (typ == "fail") : return fail(line, scan)
-    if (typ == "inc") : return increase(line, scan)
-    if (typ == "dis") : return discard(line, scan)
+    typ = linkless.split(":")[0]
+    if (typ == "dia") : return Dialog(line, scan, root)
+    if (typ == "que") : return Question(line, scan, root)
+    if (typ == "cho") : return Choice(line, scan, root)
+    if (typ == "cqu") : return CardQuestion(line, scan, root)
+    if (typ == "car") : return Card(line, scan, root)
+    if (typ == "fail") : return fail(line, scan, root)
+    if (typ == "inc") : return increase(line, scan, root)
+    if (typ == "dis") : return discard(line, scan, root)
+    if (typ == "lin") : return link(line, scan, root)
+    if (typ == "fla") : return toggle_flag(line, scan, root)
 
 class EventFileParser:
     def __init__(self, filename):
