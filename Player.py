@@ -24,6 +24,7 @@ class player():
         self.flags = data[2].split(":")
         self.hand = hand(self)
         self.disp = Display.TextDisplay(self)
+        self.ecount = {}    #times they've played an event
         dprint("player data successfully parsed")
         
     def saveGame(self, filename):
@@ -35,6 +36,10 @@ class player():
             if i <len(self.flags)-1:
                 writ.write(":")
     def event_player(self, root):
+        if root.id in self.ecount :
+            self.ecount[root.id]+=1
+        else :
+            self.ecount[root.id] = 1
         self.loc = root.location
         self.micro_router(root.MEroot)
     def toggle_flag(self, flag):
