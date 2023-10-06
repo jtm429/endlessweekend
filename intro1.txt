@@ -59,7 +59,6 @@ end:pass
 car:eloquence:1::Rally the troops?
 dia:Leo::happy:Not exactly how I would put it, but yeah
 dia:Leo:::Look, we can win this if we just work together. We just need to squeak two more runs out to put us ahead. 
-
 end:pass
 end:que
 end:cho

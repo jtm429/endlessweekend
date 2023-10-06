@@ -1,3 +1,4 @@
 EWeek
 *.log
+*.bac
 __pycache__

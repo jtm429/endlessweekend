@@ -6,4 +6,5 @@ if __name__ == "__main__":
     a.parse()
     plyr = Player.player()
     plyr.event_player(a.root)
+    a.root.encode("test.txt")
     exit()

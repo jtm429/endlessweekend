@@ -15,22 +15,38 @@ class EventRoot():
         self.links = {}
         dprint("Begin parsing tree")
         self.MEroot  = choose_type(scan, self) #microevent root
+    def encode(self, filename):
+        data = self.id + ":" + self.location +"\n"
+        data += self.MEroot.encode()
+        data += "end:file"
+        file = open(filename, "w")
+        file.write(data)
+        file.close()
+
+
         
 #basic MicroEvent Class
 class MicroEvent():
     
     def __init__(self,lima, scan, root):
+        self.link=""
         if "#\\#" in lima:
             linkk = lima.split("#\\#")
             root.links.update({linkk[0]:self})
             self.line = linkk[1]
+            self.link = linkk[0]+"#\\#"
         else :
             self.line = lima
+            
         self.scan = scan
         self.root = root
         self.parse()
     def parse(self):
         pass
+    def encode(self)-> str:
+        pass
+    def __str__(self):
+        return self.encode()
 
 #extended from MicroEvent
 class Dialog(MicroEvent):
@@ -46,6 +62,11 @@ class Dialog(MicroEvent):
         dprint("Parsed Dialog MicroEvent")
         self.nex = choose_type(self.scan,self.root)
         dprint("Dialog recursion ended successfully!")
+    def encode(self):
+        line = self.link+self.type + ":"+self.who + ":"+ self.con + ":"+ self.emo + ":"+ self.text +"\n"
+        dprint(line)
+        line += self.nex.encode()
+        return line
 
 #extended from MicroEvent
 class Question(MicroEvent):
@@ -78,10 +99,22 @@ class Question(MicroEvent):
             dprint(str(count) + " answer choice successfully loaded!")
             cho = choose_type(self.scan,self.root)
         #for question to be conditional you need to have a fail state
+        self.nex = ""
         if(self.con != ""):
             dprint("Conditional question fail state")
             self.nex = choose_type(self.scan, self.root)
         dprint("Question While Loop Complete!")
+    def encode(self):
+        line = self.link +self.type + ":"+self.who + ":"+ self.con + ":"+ self.emo + ":"+ self.text +"\n"
+        dprint(line)
+        for choice in self.choices:
+            line += choice.encode()
+        line += "end:que\n"
+        #if it has nex it calls encode
+        #as per the __str__ defined in 
+        #MicroEvent otherwise its ""
+        line += str(self.nex)
+        return line
     
 
 #extended from MicroEvent
@@ -99,6 +132,12 @@ class Choice(MicroEvent):
         dprint("Parsed choice MicroEvent")
         self.nex = choose_type(self.scan,self.root)
         dprint("choice recursion ended successfully!")
+    def encode(self):
+        line = self.link+self.type + ":"+self.who + ":"+ self.con + ":"+ self.text +"\n"
+        dprint(line)
+        line += self.nex.encode()
+        line += "end:cho\n"
+        return line
 
 
 """
@@ -132,6 +171,13 @@ class CardQuestion(MicroEvent):
             dprint(str(count) + " answer card successfully loaded")
             cho = choose_type(self.scan,self.root)
         dprint("Card Question Loop ended successfully")
+    def encode(self):
+        line = self.link +self.type + ":"+self.who + ":"+ self.text +"\n"
+        dprint(line)
+        for key, event in self.choices.items():
+            line += event.encode()
+        line += "end:cqu\n"
+        return line
 
 #this is the card answer choice for Card Questions
 #if there is no condition, there is no pass/fail block
@@ -144,7 +190,6 @@ class Card(MicroEvent):
         #fail
         #...
         #end:fail
-        #end:card
         par = self.line.split(":")
         self.type = par[0]
         self.card = par[1]
@@ -154,9 +199,17 @@ class Card(MicroEvent):
         dprint("Parsed Card Choice MicroEvent")
         self.passed = choose_type(self.scan,self.root)
         dprint("Card Choice Pass Condition Loaded")
+        self.fail = ""
         if self.con != "" : 
             self.fail = choose_type(self.scan,self.root)
         dprint("Card Choice recursion exited successfully!")
+    def encode(self):
+        line = self.link+self.type + ":"+self.card + ":"+str(int(self.isProvided)) + ":" + self.con + ":"+ self.text +"\n"
+        dprint(line)
+        line += self.passed.encode()
+        line += "end:pass\n"
+        line +=str(self.fail)
+        return line
 
 #fail condition for card choice
 class Fail(MicroEvent):
@@ -169,6 +222,12 @@ class Fail(MicroEvent):
         self.text = par[1]
         dprint("Fail con loaded, forehead")
         self.nex = choose_type(self.scan,self.root)
+    def encode(self) -> str:
+        line = self.link + self.type + ":" + self.text + "\n"
+        dprint(line)
+        line+= self.nex.encode()
+        line+= "end:fail\n"
+        return line
 
 
 
@@ -180,6 +239,9 @@ class End(MicroEvent):
             self.type = par[0]
             self.end = par[1]
         else : self.type = self.line
+    def encode(self) -> str:
+        dprint("end encode")
+        return "" #Ends are needed within the tree, but they're managed by the MicroEvent they're ending
 
 #Increase a stat or skill level
 class Increase(MicroEvent):
@@ -193,6 +255,11 @@ class Increase(MicroEvent):
         self.amt = int(par[3])
         dprint("Parsed Skill/Stat Increase")
         self.nex = choose_type(self.scan,self.root)
+    def encode(self) -> str:
+        line = self.link + self.type +":"+str(int(self.isSkill)) +":" + self.toIncrease + ":" + str(self.amt) + "\n"
+        dprint(line)
+        line += self.nex.encode()
+        return line
 
 class Toggle_Flag(MicroEvent):
     def parse(self):
@@ -202,6 +269,13 @@ class Toggle_Flag(MicroEvent):
         self.type = par[0]
         self.flag = par[1]
         self.on = ("1" == par[2]) #True is on, soooo...
+        #get next
+        self.nex = choose_type(self.scan,self.root)
+    def encode(self) -> str:
+        line = self.link + self.type +":" + self.flag + ":" + str(int(self.on)) + "\n"
+        dprint(line)
+        line+=self.nex.encode() 
+        return line
 #Discard a skill card
 class Discard(MicroEvent):
     def parse(self):
@@ -212,14 +286,23 @@ class Discard(MicroEvent):
         self.card = par[1]
         dprint("Parsed discard")
         self.nex = choose_type(self.scan,self.root)
+    def encode(self) -> str:
+        line = self.link + self.type + ":" + self.card +"\n"
+        dprint(str(self.nex))
+        line+=self.nex.encode() 
+        return line
 
 #MicroEvent that sends you back to a link tag
 class Link(MicroEvent):
     def parse(self):
         par = self.line.split(":")
         self.type = par[0]
+        self.key = par[1]
         self.nex = self.root.links[par[1]]
         dprint("link to \"" + par[1] + "\" successfully parsed!")  
+    def encode(self) -> str:
+        line = self.type + ":" + self.key + "\n"
+        return line
 
 def choose_type(scan, root) -> MicroEvent :
     line = scan.readline().split("\n")[0]
@@ -227,9 +310,9 @@ def choose_type(scan, root) -> MicroEvent :
     if "#\\#" in line:
         linkless = line.split("#\\#")[1]
     #there's no reason someone would link to end. 
-    if (line == "end") : return End(line,scan, root)
     dprint("Read in line: \"" + line + "\"")
     typ = linkless.split(":")[0]
+    if (typ == "end") : return End(line,scan, root)
     if (typ == "dia") : return Dialog(line, scan, root)
     if (typ == "que") : return Question(line, scan, root)
     if (typ == "cho") : return Choice(line, scan, root)
