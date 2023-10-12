@@ -146,6 +146,9 @@ class skill():
             self.bval+=1
             self.inc = 1
         return addy
+    #declaring str method
+    def __str__(self) -> str:
+        return str(self.bval) +"."+str(self.exp)
 #hand of cards class
 class hand():
     def __init__(self, plyr):
