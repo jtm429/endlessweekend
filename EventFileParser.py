@@ -47,6 +47,8 @@ class MicroEvent():
         pass
     def __str__(self):
         return self.encode()
+    def getChildren(self):
+        pass
 
 #extended from MicroEvent
 class Dialog(MicroEvent):
@@ -67,6 +69,9 @@ class Dialog(MicroEvent):
         dprint(line)
         line += self.nex.encode()
         return line
+    def getChildren(self):
+        chillin = {'next:{}'.format(self.nex.text):self.nex}
+        return chillin
 
 #extended from MicroEvent
 class Question(MicroEvent):
@@ -115,6 +120,12 @@ class Question(MicroEvent):
         #MicroEvent otherwise its ""
         line += str(self.nex)
         return line
+    def getChildren(self):
+        if not self.nex == "":
+            chillin = {'next:{}'.format(self.nex.text):self.nex}
+        for i in range(len(self.choices)):
+            chillin[self.choices[i].text] = self.choices[i]
+        return chillin
     
 
 #extended from MicroEvent
@@ -138,6 +149,9 @@ class Choice(MicroEvent):
         line += self.nex.encode()
         line += "end:cho\n"
         return line
+    def getChildren(self):
+        chillin = {'next:{}'.format(self.nex.text):self.nex}
+        return chillin
 
 
 """
@@ -178,6 +192,11 @@ class CardQuestion(MicroEvent):
             line += event.encode()
         line += "end:cqu\n"
         return line
+    def getChildren(self):
+        chillin = {}
+        for key, event in self.choices.items():
+            chillin['{}:{}'.format(key,event.text)] = event
+        return chillin
 
 #this is the card answer choice for Card Questions
 #if there is no condition, there is no pass/fail block
@@ -210,6 +229,10 @@ class Card(MicroEvent):
         line += "end:pass\n"
         line +=str(self.fail)
         return line
+    def getChildren(self):
+        chillins = {'pass:{}'.format(self.passed.text):self.passed}
+        if not self.fail == "" : chillins.update({'fail:{}'.format(self.fail.text):self.fail})
+        return chillins
 
 #fail condition for card choice
 class Fail(MicroEvent):
@@ -228,7 +251,9 @@ class Fail(MicroEvent):
         line+= self.nex.encode()
         line+= "end:fail\n"
         return line
-
+    def getChildren(self):
+        chillin = {'next:{}'.format(self.nex.text):self.nex}
+        return chillin
 
 
 
@@ -242,6 +267,8 @@ class End(MicroEvent):
     def encode(self) -> str:
         dprint("end encode")
         return "" #Ends are needed within the tree, but they're managed by the MicroEvent they're ending
+    def getChildren(self):
+        return ""
 
 #Increase a stat or skill level
 class Increase(MicroEvent):
@@ -260,6 +287,9 @@ class Increase(MicroEvent):
         dprint(line)
         line += self.nex.encode()
         return line
+    def getChildren(self):
+        chillin = {'next:{}'.format(self.nex.text):self.nex}
+        return chillin
 
 class Toggle_Flag(MicroEvent):
     def parse(self):
@@ -276,6 +306,9 @@ class Toggle_Flag(MicroEvent):
         dprint(line)
         line+=self.nex.encode() 
         return line
+    def getChildren(self):
+        chillin = {'next:{}'.format(self.nex.text):self.nex}
+        return chillin
 #Discard a skill card
 class Discard(MicroEvent):
     def parse(self):
@@ -291,6 +324,8 @@ class Discard(MicroEvent):
         dprint(str(self.nex))
         line+=self.nex.encode() 
         return line
+    def getChildren(self):
+        return [self.nex]
 
 #MicroEvent that sends you back to a link tag
 class Link(MicroEvent):
@@ -303,6 +338,9 @@ class Link(MicroEvent):
     def encode(self) -> str:
         line = self.type + ":" + self.key + "\n"
         return line
+    def getChildren(self):
+        chillin = {'next:{}'.format(self.nex.text):self.nex}
+        return chillin
 
 def choose_type(scan, root) -> MicroEvent :
     line = scan.readline().split("\n")[0]

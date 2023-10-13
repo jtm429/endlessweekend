@@ -149,13 +149,52 @@ def display_vals(mevent : eve.MicroEvent, top = True):
     if mevent.type == "lin" :vlas = disval_lin(mevent, top)
     return vlas
 def get_children(mevent : eve.MicroEvent):
+    chillin = []
+    if not mevent.type == "end" :
+        if mevent.type in ["dia", "que", "cho", "fail", "inc", "que", "que", "que"]:
+            chillin.append(mevent.nex)
+    return chillin
     
-    pass
 
 class EventEditor():
     def __init__(self, filename):
         file = eve.EventFileParser(filename)
         file.parse()
         self.root = file.root
+        #this is a stack to hold on to previous "back"s
+        self.back = ["top"]
         self.sel = self.root.MEroot
-        self.children = get_children(self.sel)
+    def change_selection(self):
+        #display current selection
+        display_vals(self.sel)
+        line = ""
+        choices = []
+        k = 0
+        #adding the option to go to previous microevents
+        if not self.back[-1] == "top":
+            choices.append(self.back)
+            line+="{}:back:{}\n".format(k,self.back.text)
+            k+=1
+        #adding all possible child microevents
+        for i, j in self.sel.getChildren().items():
+            choices.append(j)
+            line+="{}:{}\n".format(k,i)
+        print(boxer(line))
+        try :
+            ans = int(input("select a new microevent:"))
+        except ValueError :
+            print("please input an int")
+        while ans not in range(len(choices)):
+            print("Your selection must be an int and within bounds.")
+            try :
+                ans = int(input("select a new microevent:"))
+            except ValueError :
+                print("please input an int")
+        #selecting the choice
+        self.back.append(self.sel)
+        self.sel = choices[ans]
+        
+        
+
+
+
